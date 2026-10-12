@@ -22,9 +22,8 @@
         <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">מערכת הזמנות ציוד משרדי</h1>
         <p class="text-sm text-slate-500">ניהול קטלוג, חיפוש מהיר והפקת הזמנות לאקסל</p>
       </div>
-      <!-- לוגו או מצב מערכת -->
       <div class="text-xs font-semibold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-lg">
-        גרסה מעודכנת
+        גרסה פעילה
       </div>
     </div>
   </header>
@@ -49,7 +48,7 @@
             <input type="number" id="newProductPrice" min="0" step="0.5" placeholder="0.00" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
           </div>
           <div class="flex items-end">
-            <button type="button" onclick="addNewProduct()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm shadow-sm transition active:scale-95 cursor-pointer">
+            <button type="button" onclick="window.addNewProduct()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm shadow-sm transition active:scale-95 cursor-pointer">
               הוסף לקטלוג
             </button>
           </div>
@@ -64,7 +63,7 @@
           </h2>
           <!-- תיבת חיפוש -->
           <div class="w-full sm:w-72">
-            <input type="text" id="searchInput" oninput="renderCatalog()" placeholder="🔍 חיפוש פריט מהיר..." class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
+            <input type="text" id="searchInput" oninput="window.renderCatalog()" placeholder="🔍 חיפוש פריט מהיר..." class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
           </div>
         </div>
 
@@ -88,14 +87,14 @@
           <div class="text-center py-8 text-slate-400 text-sm">העגלה ריקה</div>
         </div>
 
-        <!-- סיכום מחיר כולל (מוקד יחיד ומרכזי) -->
+        <!-- סיכום מחיר כולל יחיד -->
         <div class="bg-slate-900 text-white p-5 rounded-2xl mb-6 shadow-md text-center">
           <div class="text-xs text-slate-400 font-medium mb-1">סה"כ לתשלום להזמנה</div>
           <div id="cartTotalPrice" class="text-3xl font-black text-emerald-400 tracking-tight">₪0.00</div>
         </div>
 
         <!-- כפתור ייצוא לאקסל -->
-        <button type="button" onclick="exportToExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+        <button type="button" onclick="window.exportToExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
           <span>📊</span> ייצוא הזמנה לאקסל (ללא מחיר)
         </button>
       </div>
@@ -104,6 +103,7 @@
   </main>
 
   <script>
+    // נתונים התחלתיים
     let products = [
       { id: 1, name: "דפדפת A4", price: 12.5 },
       { id: 2, name: "עט כחול (בודד)", price: 2.0 },
@@ -111,28 +111,8 @@
     ];
     let cart = [];
 
-    // אתחול והאזנה למקש Enter בהוספת פריט
-    window.addEventListener('DOMContentLoaded', () => {
-      const nameIn = document.getElementById("newProductName");
-      const priceIn = document.getElementById("newProductPrice");
-
-      if (nameIn) {
-        nameIn.addEventListener("keypress", function(e) {
-          if (e.key === "Enter") addNewProduct();
-        });
-      }
-      if (priceIn) {
-        priceIn.addEventListener("keypress", function(e) {
-          if (e.key === "Enter") addNewProduct();
-        });
-      }
-
-      renderCatalog();
-      renderCart();
-    });
-
-    // הצגת הקטלוג עם סינון חיפוש
-    function renderCatalog() {
+    // הגדרת פונקציות ב-window כדי למנוע בעיות טעינה של סקריפטים
+    window.renderCatalog = function() {
       const grid = document.getElementById("catalogGrid");
       const searchInput = document.getElementById("searchInput");
       if (!grid) return;
@@ -159,21 +139,20 @@
             
             <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center gap-2">
               <input type="number" id="qty-${p.id}" placeholder="כמות" min="1" class="w-20 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-              <button type="button" onclick="addToCart(${p.id})" class="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-medium py-1.5 px-3 rounded-lg text-xs transition cursor-pointer">הוסף</button>
+              <button type="button" onclick="window.addToCart(${p.id})" class="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-medium py-1.5 px-3 rounded-lg text-xs transition cursor-pointer">הוסף</button>
             </div>
 
             <div class="flex justify-between items-center mt-3 text-xs">
-              <button type="button" onclick="editProduct(${p.id})" class="text-slate-500 hover:text-blue-600 font-medium cursor-pointer">ערוך</button>
-              <button type="button" onclick="deleteProduct(${p.id})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">מחק</button>
+              <button type="button" onclick="window.editProduct(${p.id})" class="text-slate-500 hover:text-blue-600 font-medium cursor-pointer">ערוך</button>
+              <button type="button" onclick="window.deleteProduct(${p.id})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">מחק</button>
             </div>
           </div>
         `;
       }
       grid.innerHTML = html;
-    }
+    };
 
-    // הוספת פריט חדש לקטלוג
-    function addNewProduct() {
+    window.addNewProduct = function() {
       const nameInput = document.getElementById("newProductName");
       const priceInput = document.getElementById("newProductPrice");
 
@@ -201,13 +180,79 @@
       priceInput.value = "";
       nameInput.focus();
 
-      renderCatalog();
-    }
+      window.renderCatalog();
+    };
 
-    // עריכת פריט בקטלוג
-    function editProduct(id) {
+    window.editProduct = function(id) {
       const p = products.find(item => item.id === id);
       if (!p) return;
 
       const newName = prompt("שם חדש לפריט:", p.name);
       if (newName === null) return;
+
+      const newPriceStr = prompt("מחיר חדש (₪):", p.price);
+      if (newPriceStr === null) return;
+
+      const newPrice = parseFloat(newPriceStr);
+      if (isNaN(newPrice) || newPrice < 0) {
+        alert("מחיר שגוי");
+        return;
+      }
+
+      p.name = newName.trim();
+      p.price = newPrice;
+
+      window.renderCatalog();
+      window.renderCart();
+    };
+
+    window.deleteProduct = function(id) {
+      products = products.filter(p => p.id !== id);
+      cart = cart.filter(item => item.id !== id);
+      window.renderCatalog();
+      window.renderCart();
+    };
+
+    window.addToCart = function(id) {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+
+      const qtyInput = document.getElementById("qty-" + id);
+      const qty = qtyInput ? parseInt(qtyInput.value) : NaN;
+
+      if (isNaN(qty) || qty <= 0) {
+        alert("נא להזין כמות תקינה");
+        if (qtyInput) qtyInput.focus();
+        return;
+      }
+
+      const cartItem = cart.find(item => item.id === id);
+      if (cartItem) {
+        cartItem.quantity += qty;
+      } else {
+        cart.push({ id: product.id, name: product.name, price: product.price, quantity: qty });
+      }
+
+      if (qtyInput) qtyInput.value = "";
+      window.renderCart();
+    };
+
+    window.updateCartQty = function(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        cart = cart.filter(i => i.id !== id);
+      }
+      window.renderCart();
+    };
+
+    window.removeFromCart = function(id) {
+      cart = cart.filter(i => i.id !== id);
+      window.renderCart();
+    };
+
+    window.renderCart = function() {
+      const cartList = document.getElementById("cartList");
+      const cartTotalPrice =
