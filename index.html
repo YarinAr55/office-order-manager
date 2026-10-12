@@ -4,10 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>מערכת הזמנות ציוד משרדי</title>
-  <!-- Tailwind CSS עבור עיצוב מודרני, נקי ויוקרתי -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap');
     body {
       font-family: 'Assistant', sans-serif;
     }
@@ -16,7 +15,7 @@
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen text-slate-800">
 
   <!-- כותרת עליונה -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center flex-wrap gap-4">
       <div>
         <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">מערכת הזמנות ציוד משרדי</h1>
@@ -32,7 +31,7 @@
 
   <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
     
-    <!-- צד שמאל/מרכז: קטלוג וניהול פריטים (2 עמודות במסכי מחשב) -->
+    <!-- צד שמאל/מרכז: קטלוג וניהול פריטים -->
     <div class="lg:col-span-2 space-y-6">
       
       <!-- פאנל הוספת פריט -->
@@ -50,7 +49,7 @@
             <input type="number" id="newProductPrice" min="0" step="0.5" placeholder="0.00" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
           </div>
           <div class="flex items-end">
-            <button onclick="addNewProduct()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm shadow-sm transition active:scale-95">
+            <button type="button" onclick="addNewProduct()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm shadow-sm transition active:scale-95 cursor-pointer">
               הוסף לקטלוג
             </button>
           </div>
@@ -96,7 +95,7 @@
         </div>
 
         <!-- כפתור ייצוא לאקסל -->
-        <button onclick="exportToExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2">
+        <button type="button" onclick="exportToExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
           <span>📊</span> ייצוא הזמנה לאקסל (ללא מחיר)
         </button>
       </div>
@@ -108,13 +107,21 @@
     let products = [];
     let cart = [];
 
+    // האזנה למקש Enter בשדות הקלט של הוספת מוצר
+    document.getElementById("newProductName").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") addNewProduct();
+    });
+    document.getElementById("newProductPrice").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") addNewProduct();
+    });
+
     // הצגת הקטלוג עם סינון חיפוש
     function renderCatalog() {
       const grid = document.getElementById("catalogGrid");
-      const searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
-      
-      if (!grid) return;
+      const searchInput = document.getElementById("searchInput");
+      if (!grid || !searchInput) return;
 
+      const searchTerm = searchInput.value.trim().toLowerCase();
       const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm));
 
       if (filteredProducts.length === 0) {
@@ -136,5 +143,199 @@
             
             <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center gap-2">
               <input type="number" id="qty-${p.id}" placeholder="כמות" min="1" class="w-20 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-              <button onclick="addToCart(${p.id})" class="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-medium py-1.5 px-3 rounded-lg text-xs transition">הוסף</button>
+              <button type="button" onclick="addToCart(${p.id})" class="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-medium py-1.5 px-3 rounded-lg text-xs transition cursor-pointer">הוסף</button>
             </div>
+
+            <div class="flex justify-between items-center mt-3 text-xs">
+              <button type="button" onclick="editProduct(${p.id})" class="text-slate-500 hover:text-blue-600 font-medium cursor-pointer">ערוך</button>
+              <button type="button" onclick="deleteProduct(${p.id})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">מחק</button>
+            </div>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+    }
+
+    // הוספת פריט חדש
+    function addNewProduct() {
+      const nameInput = document.getElementById("newProductName");
+      const priceInput = document.getElementById("newProductPrice");
+
+      if (!nameInput || !priceInput) return;
+
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+
+      if (!name) {
+        alert("נא להזין שם פריט");
+        nameInput.focus();
+        return;
+      }
+
+      if (isNaN(price) || price < 0) {
+        alert("נא להזין מחיר תקין");
+        priceInput.focus();
+        return;
+      }
+
+      const newId = products.length > 0 ? Math.max.apply(null, products.map(p => p.id)) + 1 : 1;
+      products.push({ id: newId, name: name, price: price });
+
+      nameInput.value = "";
+      priceInput.value = "";
+      nameInput.focus();
+
+      renderCatalog();
+    }
+
+    // עריכת פריט
+    function editProduct(id) {
+      const p = products.find(item => item.id === id);
+      if (!p) return;
+
+      const newName = prompt("שם חדש לפריט:", p.name);
+      if (newName === null) return;
+
+      const newPriceStr = prompt("מחיר חדש (₪):", p.price);
+      if (newPriceStr === null) return;
+
+      const newPrice = parseFloat(newPriceStr);
+      if (isNaN(newPrice) || newPrice < 0) {
+        alert("מחיר שגוי");
+        return;
+      }
+
+      p.name = newName.trim();
+      p.price = newPrice;
+
+      renderCatalog();
+      renderCart();
+    }
+
+    // מחיקת פריט
+    function deleteProduct(id) {
+      products = products.filter(p => p.id !== id);
+      cart = cart.filter(item => item.id !== id);
+      renderCatalog();
+      renderCart();
+    }
+
+    // הוספה לעגלה
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+
+      const qtyInput = document.getElementById("qty-" + id);
+      const qty = qtyInput ? parseInt(qtyInput.value) : NaN;
+
+      if (isNaN(qty) || qty <= 0) {
+        alert("נא להזין כמות תקינה");
+        if (qtyInput) qtyInput.focus();
+        return;
+      }
+
+      const cartItem = cart.find(item => item.id === id);
+      if (cartItem) {
+        cartItem.quantity += qty;
+      } else {
+        cart.push({ id: product.id, name: product.name, price: product.price, quantity: qty });
+      }
+
+      if (qtyInput) qtyInput.value = "";
+      renderCart();
+    }
+
+    // עדכון כמויות בעגלה
+    function updateCartQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        cart = cart.filter(i => i.id !== id);
+      }
+      renderCart();
+    }
+
+    // רינדור עגלה ועדכון המחיר הכולל הבולט
+    function renderCart() {
+      const cartList = document.getElementById("cartList");
+      const cartTotalPrice = document.getElementById("cartTotalPrice");
+      const headerTotalPrice = document.getElementById("headerTotalPrice");
+
+      if (!cartList) return;
+
+      let total = 0;
+
+      if (cart.length === 0) {
+        cartList.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm">העגלה ריקה</div>`;
+        cartTotalPrice.innerHTML = `₪0.00`;
+        headerTotalPrice.innerHTML = `₪0.00`;
+        return;
+      }
+
+      let html = "";
+      for (let i = 0; i < cart.length; i++) {
+        let item = cart[i];
+        const currentProd = products.find(p => p.id === item.id);
+        if (currentProd) {
+          item.name = currentProd.name;
+          item.price = currentProd.price;
+        }
+
+        total += item.price * item.quantity;
+        html += `
+          <div class="py-3 flex justify-between items-center text-sm">
+            <div>
+              <div class="font-bold text-slate-800">${item.name}</div>
+              <div class="text-xs text-slate-500">כמות: ${item.quantity} | ₪${(item.price * item.quantity).toFixed(2)}</div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="updateCartQty(${item.id}, 1)" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-slate-700 flex items-center justify-center transition cursor-pointer">+</button>
+              <button type="button" onclick="updateCartQty(${item.id}, -1)" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-slate-700 flex items-center justify-center transition cursor-pointer">-</button>
+            </div>
+          </div>
+        `;
+      }
+
+      cartList.innerHTML = html;
+      const formattedTotal = `₪${total.toFixed(2)}`;
+      cartTotalPrice.innerHTML = formattedTotal;
+      headerTotalPrice.innerHTML = formattedTotal;
+    }
+
+    // ייצוא לאקסל ללא מחיר
+    function exportToExcel() {
+      if (cart.length === 0) {
+        alert("העגלה ריקה");
+        return;
+      }
+
+      let csv = "\uFEFFשם הפריט,כמות\n";
+      for (let i = 0; i < cart.length; i++) {
+        let item = cart[i];
+        let cleanName = '"' + item.name.replace(/"/g, '""') + '"';
+        csv += cleanName + "," + item.quantity + "\n";
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "הזמנת_ציוד.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      cart = [];
+      renderCart();
+      alert("ההזמנה יוצאה לאקסל בהצלחה!");
+    }
+
+    // אתחול ראשוני
+    renderCatalog();
+    renderCart();
+  </script>
+
+</body>
+</html>
