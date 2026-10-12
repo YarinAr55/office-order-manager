@@ -194,8 +194,18 @@
       background: #b45309;
     }
 
+    .btn-delete-catalog {
+      background: #dc2626;
+      flex: 1;
+    }
+
+    .btn-delete-catalog:hover {
+      background: #b91c1c;
+    }
+
     .btn-add-cart {
       flex: 2;
+      background: #2563eb;
     }
 
     .cart-item {
@@ -254,7 +264,7 @@
     <div class="header-content">
       <div>
         <h1>מערכת הזמנות ציוד משרדי</h1>
-        <p>הוסף פריטים משלך לקטלוג, בחר כמויות והזמן בקלות</p>
+        <p>ניהול קטלוג, הזמנות וייצוא לאקסל ללא מחירים</p>
       </div>
       <div class="header-total-badge" id="headerTotal">
         סה"כ להזמנה: ₪0.00
@@ -265,7 +275,6 @@
   <div class="container">
     <!-- צד שמאל: הוספת מוצר וקטלוג -->
     <main>
-      <!-- אזור הוספת פריט חדש לקטלוג -->
       <div class="card">
         <h2>הוספת פריט חדש לקטלוג</h2>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -283,11 +292,10 @@
         </div>
       </div>
 
-      <!-- קטלוג מוצרים -->
       <div class="card">
         <h2>קטלוג פריטים</h2>
         <div class="products-grid" id="productsGrid">
-          <!-- הפריטים יטענו דינמית כאן -->
+          <!-- הפריטים יטענו דינמית -->
         </div>
       </div>
     </main>
@@ -300,7 +308,7 @@
           <p style="color: #64748b; text-align: center; padding: 20px 0;">העגלה ריקה</p>
         </div>
         <div class="cart-total" id="cartTotal">סה"כ: ₪0.00</div>
-        <button class="checkout-btn" onclick="submitOrder()">שליחת הזמנה</button>
+        <button class="checkout-btn" onclick="exportToExcel()">שליחה וייצוא לאקסל (ללא מחיר)</button>
       </div>
     </aside>
   </div>
@@ -334,7 +342,10 @@
             </div>
             <div class="product-actions">
               <button class="btn-edit" onclick="editProduct(${p.id})">ערוך</button>
-              <button class="btn-add-cart" onclick="addToCart(${p.id})">הוסף לעגלה</button>
+              <button class="btn-delete-catalog" onclick="deleteProduct(${p.id})">מחק</button>
+            </div>
+            <div style="margin-top: 5px;">
+              <button class="btn-add-cart" onclick="addToCart(${p.id})" style="width: 100%;">הוסף לעגלה</button>
             </div>
           </div>
         `;
@@ -374,7 +385,7 @@
       renderProducts();
     }
 
-    // עריכת פריט קיים בקטלוג
+    // עריכת פריט בקטלוג
     function editProduct(productId) {
       const product = products.find(function(p) { return p.id === productId; });
       if (!product) return;
@@ -398,7 +409,16 @@
       renderCart();
     }
 
-    // הוספת מוצר לעגלה לפי הכמות שנבחרה בקובייה שלו
+    // מחיקת פריט מהקטלוג
+    function deleteProduct(productId) {
+      if (!confirm("האם למחוק פריט זה מהקטלוג?")) return;
+      products = products.filter(function(p) { return p.id !== productId; });
+      cart = cart.filter(function(item) { return item.id !== productId; });
+      renderProducts();
+      renderCart();
+    }
+
+    // הוספה לעגלה
     function addToCart(productId) {
       const product = products.find(function(p) { return p.id === productId; });
       if (!product) return;
@@ -435,7 +455,7 @@
       renderCart();
     }
 
-    // הצגת תוכן העגלה וחישוב סכומים
+    // רינדור עגלה וסיכומים
     function renderCart() {
       const cartContainer = document.getElementById("cartItems");
       const cartTotalContainer = document.getElementById("cartTotal");
@@ -482,21 +502,31 @@
       headerTotalContainer.innerHTML = `סה"כ להזמנה: ₪${total.toFixed(2)}`;
     }
 
-    // שליחת הזמנה
-    function submitOrder() {
+    // ייצוא לאקסל (CSV) ללא עמודת מחיר
+    function exportToExcel() {
       if (cart.length === 0) {
-        alert("העגלה ריקה, אנא הוסף פריטים לפני שליחת ההזמנה.");
+        alert("העגלה ריקה, אנא הוסף פריטים לפני הייצוא.");
         return;
       }
-      alert("ההזמנה נשלחה בהצלחה!");
-      cart = [];
-      renderCart();
-    }
 
-    // טעינה התחלתית
-    renderProducts();
-    renderCart();
-  </script>
+      // יצירת תוכן קובץ CSV עם קידוד תומך בעברית (UTF-8 BOM)
+      let csvContent = "\uFEFFשם הפריט,כמות\n";
 
-</body>
-</html>
+      for (let i = 0; i < cart.length; i++) {
+        let item = cart[i];
+        // נקיון מרכאות כפולות בשם הפריט למניעת שיבוש בטבלה
+        let cleanName = '"' + item.name.replace(/"/g, '""') + '"';
+        csvContent += cleanName + "," + item.quantity + "\n";
+      }
+
+      // יצירת קובץ להורדה אוטומטית בדפדפן
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "הזמנת_ציוד_משרדי.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      alert("ההזמנה יוצאה בהצלחה לקובץ א
