@@ -1,40 +1,491 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>מערכת הזמנות ציוד משרדי</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap');
+    body { font-family: 'Assistant', sans-serif; }
+    
+    /* אנימציות חלקות */
+    .fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* סגנון ההודעות */
+    .toast-message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
     }
-
-    input[type="number"] {
-      direction: ltr;
+    
+    .toast-success { background-color: #10b981; }
+    .toast-error { background-color: #ef4444; }
+    
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
   </style>
 </head>
-
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen text-slate-800 pb-12">
 
-<!-- כותרת -->
-<header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 py-4">
+  <!-- כותרת עליונה -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center flex-wrap gap-4">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">מערכת הזמנות ציוד משרדי</h1>
+        <p class="text-xs sm:text-sm text-slate-500">ניהול קטלוג, חיפוש מהיר והפקת הזמנות לאקסל</p>
+      </div>
+      <div class="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
+        ✓ חיבור אירועים מאובטח
+      </div>
+    </div>
+  </header>
 
-    <h1 class="text-2xl font-bold text-blue-600">
-      מערכת הזמנות ציוד משרדי
-    </h1>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+    
+    <!-- צד שמאל: קטלוג וניהול פריטים -->
+    <div class="lg:col-span-2 space-y-6">
+      
+      <!-- פאנל הוספת פריט -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <span>➕</span> הוספת פריט חדש לקטלוג
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">שם הפריט</label>
+            <input type="text" id="newProductName" placeholder="למשל: דפדפת A4" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">מחיר (₪)</label>
+            <input type="text" inputmode="decimal" id="newProductPrice" placeholder="0.00" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
+          </div>
+          <div class="flex items-end">
+            <button type="button" id="btnAddProduct" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm shadow-sm transition active:scale-95 cursor-pointer">
+              הוסף לקטלוג
+            </button>
+          </div>
+        </div>
+      </div>
 
-    <p class="text-sm text-slate-500">
-      ניהול קטלוג, מחירים והכנת הזמנה
-    </p>
+      <!-- פאנל חיפוש וקטלוג -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+            <span>📦</span> קטלוג פריטים
+          </h2>
+          <div class="w-full sm:w-72">
+            <input type="text" id="searchInput" placeholder="🔍 חיפוש פריט מהיר..." class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
+          </div>
+        </div>
 
-  </div>
-</header>
+        <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- הפריטים יטענו דינמית -->
+        </div>
+      </div>
 
+    </div>
 
-<main class="max-w-7xl mx-auto px-4 py-8
+    <!-- צד ימין: עגלת קניות -->
+    <div>
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80 lg:sticky lg:top-28">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <span>🛒</span> עגלת הזמנות
+        </h2>
+
+        <div id="cartList" class="divide-y divide-slate-100 max-h-[350px] overflow-y-auto mb-6 pr-1">
+          <div class="text-center py-8 text-slate-400 text-sm">העגלה ריקה</div>
+        </div>
+
+        <!-- מחיר כולל יחיד ומרכזי -->
+        <div class="bg-slate-900 text-white p-5 rounded-2xl mb-6 shadow-md text-center">
+          <div class="text-xs text-slate-400 font-medium mb-1">סה"כ לתשלום להזמנה</div>
+          <div id="cartTotalPrice" class="text-3xl font-black text-emerald-400 tracking-tight">₪0.00</div>
+        </div>
+
+        <button type="button" id="btnExport" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+          <span>📊</span> ייצוא הזמנה לאקסל (ללא מחיר)
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let products = [
+      { id: 1, name: "דפדפת A4", price: 12.5 },
+      { id: 2, name: "עט כחול (בודד)", price: 1.2 },
+      { id: 3, name: "מרקר צהוב", price: 4.5 }
+    ];
+    let cart = [];
+
+    // פונקציה לתצוגת הודעות
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast-message fade-in toast-${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // אתחול האזנה לאירועים ברגע שהעמוד נטען במלואו
+    document.addEventListener("DOMContentLoaded", function() {
+      const btnAdd = document.getElementById("btnAddProduct");
+      const btnExport = document.getElementById("btnExport");
+      const searchInput = document.getElementById("searchInput");
+      const nameInput = document.getElementById("newProductName");
+      const priceInput = document.getElementById("newProductPrice");
+
+      if (btnAdd) {
+        btnAdd.addEventListener("click", addNewProduct);
+      }
+
+      if (btnExport) {
+        btnExport.addEventListener("click", exportToExcel);
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener("input", renderCatalog);
+      }
+
+      // תמיכה בלחיצת Enter להוספה מהירה
+      if (nameInput) {
+        nameInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addNewProduct();
+          }
+        });
+      }
+
+      if (priceInput) {
+        priceInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addNewProduct();
+          }
+        });
+      }
+
+      renderCatalog();
+      renderCart();
+    });
+
+    function renderCatalog() {
+      const grid = document.getElementById("catalogGrid");
+      const searchInput = document.getElementById("searchInput");
+      if (!grid) return;
+
+      const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : "";
+      const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+
+      if (filteredProducts.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-sm">לא נמצאו פריטים בקטלוג.</div>`;
+        return;
+      }
+
+      let html = "";
+      for (let i = 0; i < filteredProducts.length; i++) {
+        let p = filteredProducts[i];
+        html += `
+          <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
+            <div>
+              <div class="flex justify-between items-start gap-2 mb-1">
+                <h3 class="font-bold text-slate-800 text-sm">${p.name}</h3>
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">₪${p.price.toFixed(2)}</span>
+              </div>
+            </div>
+            
+            <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center gap-2">
+              <input type="number" id="qty-${p.id}" placeholder="כמות" min="1" class="w-20 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20" value="1" />
+              <button type="button" class="btn-add-cart flex-1 bg-slate-900 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg text-xs transition cursor-pointer" data-add-id="${p.id}">הוסף</button>
+            </div>
+
+            <div class="flex justify-between items-center mt-3 text-xs gap-2">
+              <button type="button" class="btn-edit text-slate-500 hover:text-blue-600 font-medium cursor-pointer p-1 flex-1" data-edit-id="${p.id}">ערוך</button>
+              <button type="button" class="btn-delete text-red-500 hover:text-red-700 font-medium cursor-pointer p-1 flex-1" data-delete-id="${p.id}">מחק</button>
+            </div>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+
+      // חיבור האזנות לכפתורים שנוצרו דינמית בקטלוג
+      attachCatalogListeners();
+    }
+
+    function attachCatalogListeners() {
+      // הוספה לעגלה
+      document.querySelectorAll(".btn-add-cart").forEach(btn => {
+        btn.removeEventListener("click", handleAddToCart); // הסרת ריסנים ישנים
+        btn.addEventListener("click", handleAddToCart);
+      });
+
+      // עריכת פריט
+      document.querySelectorAll(".btn-edit").forEach(btn => {
+        btn.removeEventListener("click", handleEditProduct);
+        btn.addEventListener("click", handleEditProduct);
+      });
+
+      // מחיקת פריט
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.removeEventListener("click", handleDeleteProduct);
+        btn.addEventListener("click", handleDeleteProduct);
+      });
+    }
+
+    function handleAddToCart(e) {
+      const id = parseInt(e.target.getAttribute("data-add-id"));
+      addToCart(id);
+    }
+
+    function handleEditProduct(e) {
+      const id = parseInt(e.target.getAttribute("data-edit-id"));
+      editProduct(id);
+    }
+
+    function handleDeleteProduct(e) {
+      const id = parseInt(e.target.getAttribute("data-delete-id"));
+      deleteProduct(id);
+    }
+
+    function addNewProduct() {
+      const nameInput = document.getElementById("newProductName");
+      const priceInput = document.getElementById("newProductPrice");
+
+      if (!nameInput || !priceInput) return;
+
+      const name = nameInput.value.trim();
+      const rawPrice = priceInput.value.trim().replace(',', '.');
+      const price = parseFloat(rawPrice);
+
+      if (!name) {
+        showToast("נא להזין שם פריט", "error");
+        nameInput.focus();
+        return;
+      }
+
+      if (isNaN(price) || price < 0) {
+        showToast("נא להזין מחיר תקין (למשל 1.2)", "error");
+        priceInput.focus();
+        return;
+      }
+
+      const newId = products.length > 0 ? Math.max.apply(null, products.map(p => p.id)) + 1 : 1;
+      products.push({ id: newId, name: name, price: price });
+
+      nameInput.value = "";
+      priceInput.value = "";
+      nameInput.focus();
+
+      showToast(`פריט "${name}" הוסף בהצלחה ✓`, "success");
+      renderCatalog();
+    }
+
+    function editProduct(id) {
+      const p = products.find(item => item.id === id);
+      if (!p) return;
+
+      const newName = prompt("שם חדש לפריט:", p.name);
+      if (newName === null) return;
+
+      const newPriceStr = prompt("מחיר חדש (₪):", p.price);
+      if (newPriceStr === null) return;
+
+      const rawNewPrice = newPriceStr.trim().replace(',', '.');
+      const newPrice = parseFloat(rawNewPrice);
+      if (isNaN(newPrice) || newPrice < 0) {
+        showToast("מחיר שגוי", "error");
+        return;
+      }
+
+      p.name = newName.trim();
+      p.price = newPrice;
+
+      showToast(`פריט עודכן בהצלחה ✓`, "success");
+      renderCatalog();
+      renderCart();
+    }
+
+    function deleteProduct(id) {
+      if (!confirm("האם אתה בטוח שברצונך למחוק פריט זה?")) return;
+      
+      products = products.filter(p => p.id !== id);
+      cart = cart.filter(item => item.id !== id);
+      
+      showToast("פריט הוסר בהצלחה ✓", "success");
+      renderCatalog();
+      renderCart();
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+
+      const qtyInput = document.getElementById("qty-" + id);
+      const qty = qtyInput ? parseInt(qtyInput.value) : NaN;
+
+      if (isNaN(qty) || qty <= 0) {
+        showToast("נא להזין כמות תקינה", "error");
+        if (qtyInput) qtyInput.focus();
+        return;
+      }
+
+      const cartItem = cart.find(item => item.id === id);
+      if (cartItem) {
+        cartItem.quantity += qty;
+      } else {
+        cart.push({ id: product.id, name: product.name, price: product.price, quantity: qty });
+      }
+
+      if (qtyInput) qtyInput.value = "1";
+      showToast(`${product.name} × ${qty} הוסף לעגלה ✓`, "success");
+      renderCart();
+    }
+
+    function updateCartQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        cart = cart.filter(i => i.id !== id);
+        showToast("פריט הוסר מהעגלה", "success");
+      }
+      renderCart();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.id !== id);
+      showToast("פריט הוסר מהעגלה ✓", "success");
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartList = document.getElementById("cartList");
+      const cartTotalPrice = document.getElementById("cartTotalPrice");
+
+      if (!cartList) return;
+
+      let total = 0;
+
+      if (cart.length === 0) {
+        cartList.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm">העגלה ריקה</div>`;
+        if (cartTotalPrice) cartTotalPrice.innerHTML = `₪0.00`;
+        return;
+      }
+
+      let html = "";
+      for (let i = 0; i < cart.length; i++) {
+        let item = cart[i];
+        const currentProd = products.find(p => p.id === item.id);
+        if (currentProd) {
+          item.name = currentProd.name;
+          item.price = currentProd.price;
+        }
+
+        total += item.price * item.quantity;
+        html += `
+          <div class="py-3 flex justify-between items-center text-sm gap-2">
+            <div>
+              <div class="font-bold text-slate-800">${item.name}</div>
+              <div class="text-xs text-slate-500">כמות: ${item.quantity} | ₪${(item.price * item.quantity).toFixed(2)}</div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" class="btn-cart-plus w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-slate-700 flex items-center justify-center transition cursor-pointer" data-item-id="${item.id}">+</button>
+              <button type="button" class="btn-cart-minus w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-slate-700 flex items-center justify-center transition cursor-pointer" data-item-id="${item.id}">-</button>
+              <button type="button" class="btn-cart-remove w-8 h-8 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold flex items-center justify-center transition cursor-pointer" data-item-id="${item.id}" title="מחק מהעגלה">×</button>
+            </div>
+          </div>
+        `;
+      }
+
+      cartList.innerHTML = html;
+      if (cartTotalPrice) {
+        cartTotalPrice.innerHTML = `₪${total.toFixed(2)}`;
+      }
+
+      // חיבור האזנות לכפתורי העגלה
+      attachCartListeners();
+    }
+
+    function attachCartListeners() {
+      // כפתור הוספה לעגלה
+      document.querySelectorAll(".btn-cart-plus").forEach(btn => {
+        btn.removeEventListener("click", handleCartPlus);
+        btn.addEventListener("click", handleCartPlus);
+      });
+
+      // כפתור הפחתה מהעגלה
+      document.querySelectorAll(".btn-cart-minus").forEach(btn => {
+        btn.removeEventListener("click", handleCartMinus);
+        btn.addEventListener("click", handleCartMinus);
+      });
+
+      // כפתור הסרה מהעגלה
+      document.querySelectorAll(".btn-cart-remove").forEach(btn => {
+        btn.removeEventListener("click", handleCartRemove);
+        btn.addEventListener("click", handleCartRemove);
+      });
+    }
+
+    function handleCartPlus(e) {
+      const itemId = parseInt(e.target.getAttribute("data-item-id"));
+      updateCartQty(itemId, 1);
+    }
+
+    function handleCartMinus(e) {
+      const itemId = parseInt(e.target.getAttribute("data-item-id"));
+      updateCartQty(itemId, -1);
+    }
+
+    function handleCartRemove(e) {
+      const itemId = parseInt(e.target.getAttribute("data-item-id"));
+      removeFromCart(itemId);
+    }
+
+    function exportToExcel() {
+      if (cart.length === 0) {
+        showToast("העגלה ריקה", "error");
+        return;
+      }
+
+      let csv = "\uFEFFשם הפריט,כמות\n";
+      for (let i = 0; i < cart.length; i++) {
+        let item = cart[i];
+        let cleanName = '"' + item.name.replace(/"/g, '""') + '"';
+        csv += cleanName + "," + item.quantity + "\n";
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "הזמנת_ציוד.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      cart = [];
+      showToast("ההזמנה יוצאה לאקסל בהצלחה! ✓", "success");
+      renderCart();
+    }
+  </script>
+
+</body>
+</html>
