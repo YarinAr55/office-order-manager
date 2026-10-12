@@ -21,7 +21,7 @@
         <p class="text-xs sm:text-sm text-slate-500">ניהול קטלוג, חיפוש מהיר והפקת הזמנות לאקסל</p>
       </div>
       <div class="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
-        ✓ תומך במחירים עשרוניים (למשל 1.2)
+        ✓ מערכת פעילה ותקינה
       </div>
     </div>
   </header>
@@ -36,22 +36,22 @@
         <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
           <span>➕</span> הוספת פריט חדש לקטלוג
         </h2>
-        <form id="addProductForm" onsubmit="event.preventDefault(); addNewProduct();" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- ללא טופס בעייתי - פריסה נקייה וישירה עם תמיכה בלחיצת Enter -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">שם הפריט</label>
             <input type="text" id="newProductName" placeholder="למשל: דפדפת A4" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">מחיר (₪)</label>
-            <!-- step="any" מאפשר להקליד כל מספר עשרוני כמו 1.2, 0.5 וכו' -->
             <input type="number" id="newProductPrice" min="0" step="any" placeholder="0.00" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition" />
           </div>
           <div class="flex items-end">
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm shadow-sm transition active:scale-95 cursor-pointer">
+            <button type="button" onclick="addNewProduct()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm shadow-sm transition active:scale-95 cursor-pointer">
               הוסף לקטלוג
             </button>
           </div>
-        </form>
+        </div>
       </div>
 
       <!-- פאנל חיפוש וקטלוג -->
@@ -105,6 +105,32 @@
     ];
     let cart = [];
 
+    // תמיכה בהוספה ע"י מקש Enter בשדות הקלט
+    window.addEventListener('DOMContentLoaded', () => {
+      const nameInput = document.getElementById("newProductName");
+      const priceInput = document.getElementById("newProductPrice");
+
+      if (nameInput) {
+        nameInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addNewProduct();
+          }
+        });
+      }
+      if (priceInput) {
+        priceInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addNewProduct();
+          }
+        });
+      }
+
+      renderCatalog();
+      renderCart();
+    });
+
     function renderCatalog() {
       const grid = document.getElementById("catalogGrid");
       const searchInput = document.getElementById("searchInput");
@@ -132,143 +158,5 @@
             
             <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center gap-2">
               <input type="number" id="qty-${p.id}" placeholder="כמות" min="1" class="w-20 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-              <button type="button" onclick="addToCart(${p.id})" class="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg text-xs transition cursor-pointer">הוסף</button>
-            </div>
-
-            <div class="flex justify-between items-center mt-3 text-xs">
-              <button type="button" onclick="editProduct(${p.id})" class="text-slate-500 hover:text-blue-600 font-medium cursor-pointer p-1">ערוך</button>
-              <button type="button" onclick="deleteProduct(${p.id})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer p-1">מחק</button>
-            </div>
-          </div>
-        `;
-      }
-      grid.innerHTML = html;
-    }
-
-    function addNewProduct() {
-      const nameInput = document.getElementById("newProductName");
-      const priceInput = document.getElementById("newProductPrice");
-
-      if (!nameInput || !priceInput) return;
-
-      const name = nameInput.value.trim();
-      const price = parseFloat(priceInput.value);
-
-      if (!name) {
-        alert("נא להזין שם פריט");
-        nameInput.focus();
-        return;
-      }
-
-      if (isNaN(price) || price < 0) {
-        alert("נא להזין מחיר תקין");
-        priceInput.focus();
-        return;
-      }
-
-      const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-      products.push({ id: newId, name: name, price: price });
-
-      nameInput.value = "";
-      priceInput.value = "";
-      nameInput.focus();
-
-      renderCatalog();
-    }
-
-    function editProduct(id) {
-      const p = products.find(item => item.id === id);
-      if (!p) return;
-
-      const newName = prompt("שם חדש לפריט:", p.name);
-      if (newName === null) return;
-
-      const newPriceStr = prompt("מחיר חדש (₪):", p.price);
-      if (newPriceStr === null) return;
-
-      const newPrice = parseFloat(newPriceStr);
-      if (isNaN(newPrice) || newPrice < 0) {
-        alert("מחיר שגוי");
-        return;
-      }
-
-      p.name = newName.trim();
-      p.price = newPrice;
-
-      renderCatalog();
-      renderCart();
-    }
-
-    function deleteProduct(id) {
-      products = products.filter(p => p.id !== id);
-      cart = cart.filter(item => item.id !== id);
-      renderCatalog();
-      renderCart();
-    }
-
-    function addToCart(id) {
-      const product = products.find(p => p.id === id);
-      if (!product) return;
-
-      const qtyInput = document.getElementById("qty-" + id);
-      const qty = qtyInput ? parseInt(qtyInput.value) : NaN;
-
-      if (isNaN(qty) || qty <= 0) {
-        alert("נא להזין כמות תקינה");
-        if (qtyInput) qtyInput.focus();
-        return;
-      }
-
-      const cartItem = cart.find(item => item.id === id);
-      if (cartItem) {
-        cartItem.quantity += qty;
-      } else {
-        cart.push({ id: product.id, name: product.name, price: product.price, quantity: qty });
-      }
-
-      if (qtyInput) qtyInput.value = "";
-      renderCart();
-    }
-
-    function updateCartQty(id, delta) {
-      const item = cart.find(i => i.id === id);
-      if (!item) return;
-
-      item.quantity += delta;
-      if (item.quantity <= 0) {
-        cart = cart.filter(i => i.id !== id);
-      }
-      renderCart();
-    }
-
-    function removeFromCart(id) {
-      cart = cart.filter(i => i.id !== id);
-      renderCart();
-    }
-
-    function renderCart() {
-      const cartList = document.getElementById("cartList");
-      const cartTotalPrice = document.getElementById("cartTotalPrice");
-
-      if (!cartList) return;
-
-      let total = 0;
-
-      if (cart.length === 0) {
-        cartList.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm">העגלה ריקה</div>`;
-        if (cartTotalPrice) cartTotalPrice.innerHTML = `₪0.00`;
-        return;
-      }
-
-      let html = "";
-      for (let i = 0; i < cart.length; i++) {
-        let item = cart[i];
-        const currentProd = products.find(p => p.id === item.id);
-        if (currentProd) {
-          item.name = currentProd.name;
-          item.price = currentProd.price;
-        }
-
-        total += item.price * item.quantity;
-        html += `
-          <div class="py-3
+              <button type="button" onclick="addToCart(${p.id})" class="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg text-xs transition cursor-pointer
+              
