@@ -120,6 +120,32 @@
     ];
     let cart = [];
 
+    function saveToLocalStorage() {
+      localStorage.setItem('officeProducts', JSON.stringify(products));
+      localStorage.setItem('officeCart', JSON.stringify(cart));
+    }
+
+    function loadFromLocalStorage() {
+      const savedProducts = localStorage.getItem('officeProducts');
+      const savedCart = localStorage.getItem('officeCart');
+
+      if (savedProducts) {
+        try {
+          products = JSON.parse(savedProducts);
+        } catch (e) {
+          console.error("Failed to load products", e);
+        }
+      }
+
+      if (savedCart) {
+        try {
+          cart = JSON.parse(savedCart);
+        } catch (e) {
+          console.error("Failed to load cart", e);
+        }
+      }
+    }
+
     function showToast(message, type = 'success') {
       const toast = document.createElement('div');
       toast.className = `toast-message fade-in toast-${type}`;
@@ -134,6 +160,8 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
+      loadFromLocalStorage();
+
       const btnAdd = document.getElementById("btnAddProduct");
       const btnExport = document.getElementById("btnExport");
       const searchInput = document.getElementById("searchInput");
@@ -270,6 +298,7 @@
 
       showToast(`פריט "${name}" הוסף בהצלחה ✓`, "success");
       renderCatalog();
+      saveToLocalStorage();
     }
 
     function editProduct(id) {
@@ -295,6 +324,7 @@
       showToast(`פריט עודכן בהצלחה ✓`, "success");
       renderCatalog();
       renderCart();
+      saveToLocalStorage();
     }
 
     function deleteProduct(id) {
@@ -306,6 +336,7 @@
       showToast("פריט הוסר בהצלחה ✓", "success");
       renderCatalog();
       renderCart();
+      saveToLocalStorage();
     }
 
     function addToCart(id) {
@@ -331,6 +362,7 @@
       if (qtyInput) qtyInput.value = "0";
       showToast(`${product.name} × ${qty} הוסף לעגלה ✓`, "success");
       renderCart();
+      saveToLocalStorage();
     }
 
     function updateCartQty(id, delta) {
@@ -343,12 +375,14 @@
         showToast("פריט הוסר מהעגלה", "success");
       }
       renderCart();
+      saveToLocalStorage();
     }
 
     function removeFromCart(id) {
       cart = cart.filter(i => i.id !== id);
       showToast("פריט הוסר מהעגלה ✓", "success");
       renderCart();
+      saveToLocalStorage();
     }
 
     function renderCart() {
@@ -456,6 +490,7 @@
       cart = [];
       showToast("ההזמנה יוצאה לאקסל בהצלחה! ✓", "success");
       renderCart();
+      saveToLocalStorage();
     }
   </script>
 
