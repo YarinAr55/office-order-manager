@@ -217,3 +217,286 @@
       margin-top: 15px;
       text-align: left;
     }
+
+    .btn-danger {
+      background: #dc2626;
+      padding: 5px 8px;
+      font-size: 12px;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      background: #059669;
+      margin-top: 15px;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    .checkout-btn:hover {
+      background: #047857;
+    }
+
+    .empty-catalog {
+      color: #64748b;
+      text-align: center;
+      padding: 30px 0;
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div>
+        <h1>מערכת הזמנות ציוד משרדי</h1>
+        <p>הוסף פריטים משלך לקטלוג, בחר כמויות והזמן בקלות</p>
+      </div>
+      <div class="header-total-badge" id="headerTotal">
+        סה"כ להזמנה: ₪0.00
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- צד שמאל: הוספת מוצר וקטלוג -->
+    <main>
+      <!-- אזור הוספת פריט חדש לקטלוג -->
+      <div class="card">
+        <h2>הוספת פריט חדש לקטלוג</h2>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <div class="form-group" style="flex: 2; min-width: 180px;">
+            <label for="newProductName">שם הפריט:</label>
+            <input type="text" id="newProductName" placeholder="למשל: דפדפת A4" />
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 120px;">
+            <label for="newProductPrice">מחיר (₪):</label>
+            <input type="number" id="newProductPrice" min="0" step="0.5" placeholder="0" />
+          </div>
+          <div style="display: flex; align-items: flex-end; flex: 0 0 auto; margin-bottom: 12px;">
+            <button type="button" onclick="addNewProduct()" style="height: 38px; background: #059669;">הוסף לקטלוג</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- קטלוג מוצרים -->
+      <div class="card">
+        <h2>קטלוג פריטים</h2>
+        <div class="products-grid" id="productsGrid">
+          <!-- הפריטים יטענו דינמית כאן -->
+        </div>
+      </div>
+    </main>
+
+    <!-- צד ימין: עגלת קניות / סיכום הזמנה -->
+    <aside>
+      <div class="card">
+        <h2>עגלת הזמנות</h2>
+        <div id="cartItems">
+          <p style="color: #64748b; text-align: center; padding: 20px 0;">העגלה ריקה</p>
+        </div>
+        <div class="cart-total" id="cartTotal">סה"כ: ₪0.00</div>
+        <button class="checkout-btn" onclick="submitOrder()">שליחת הזמנה</button>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    let products = [];
+    let cart = [];
+
+    // הצגת הקטלוג במסך
+    function renderProducts() {
+      const grid = document.getElementById("productsGrid");
+      if (!grid) return;
+
+      if (products.length === 0) {
+        grid.innerHTML = `<div class="empty-catalog">הקטלוג ריק. השתמש בטופס למעלה כדי להוסיף פריטים חדשים.</div>`;
+        return;
+      }
+      
+      let html = "";
+      for (let i = 0; i < products.length; i++) {
+        let p = products[i];
+        html += `
+          <div class="product-item">
+            <div>
+              <div class="product-title">${p.name}</div>
+              <div class="product-price">₪${p.price.toFixed(2)}</div>
+            </div>
+            <div class="product-qty-row">
+              <label for="qty-${p.id}">כמות:</label>
+              <input type="number" id="qty-${p.id}" class="product-qty-input" value="1" min="1" />
+            </div>
+            <div class="product-actions">
+              <button class="btn-edit" onclick="editProduct(${p.id})">ערוך</button>
+              <button class="btn-add-cart" onclick="addToCart(${p.id})">הוסף לעגלה</button>
+            </div>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+    }
+
+    // הוספת פריט חדש לקטלוג
+    function addNewProduct() {
+      const nameInput = document.getElementById("newProductName");
+      const priceInput = document.getElementById("newProductPrice");
+
+      if (!nameInput || !priceInput) return;
+
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+
+      if (!name) {
+        alert("אנא הכנס שם פריט.");
+        nameInput.focus();
+        return;
+      }
+
+      if (isNaN(price) || price < 0) {
+        alert("אנא הכנס מחיר תקין.");
+        priceInput.focus();
+        return;
+      }
+
+      const newId = products.length > 0 ? Math.max.apply(null, products.map(function(p) { return p.id; })) + 1 : 1;
+      products.push({ id: newId, name: name, price: price });
+
+      nameInput.value = "";
+      priceInput.value = "";
+      nameInput.focus();
+
+      renderProducts();
+    }
+
+    // עריכת פריט קיים בקטלוג
+    function editProduct(productId) {
+      const product = products.find(function(p) { return p.id === productId; });
+      if (!product) return;
+
+      const newName = prompt("הכנס שם חדש לפריט:", product.name);
+      if (newName === null) return;
+
+      const newPriceStr = prompt("הכנס מחיר חדש לפריט (₪):", product.price);
+      if (newPriceStr === null) return;
+
+      const newPrice = parseFloat(newPriceStr);
+      if (isNaN(newPrice) || newPrice < 0) {
+        alert("אנא הכנס מחיר תקין.");
+        return;
+      }
+
+      product.name = newName.trim();
+      product.price = newPrice;
+
+      renderProducts();
+      renderCart();
+    }
+
+    // הוספת מוצר לעגלה לפי הכמות שנבחרה בקובייה שלו
+    function addToCart(productId) {
+      const product = products.find(function(p) { return p.id === productId; });
+      if (!product) return;
+
+      const qtyInput = document.getElementById("qty-" + productId);
+      const quantityToAdd = qtyInput ? parseInt(qtyInput.value) : 1;
+
+      if (isNaN(quantityToAdd) || quantityToAdd <= 0) {
+        alert("אנא הכנס כמות תקינה.");
+        return;
+      }
+
+      const cartItem = cart.find(function(item) { return item.id === productId; });
+      if (cartItem) {
+        cartItem.quantity += quantityToAdd;
+      } else {
+        cart.push({ id: product.id, name: product.name, price: product.price, quantity: quantityToAdd });
+      }
+
+      if (qtyInput) qtyInput.value = "1";
+
+      renderCart();
+    }
+
+    // עדכון כמויות בעגלה
+    function updateQuantity(productId, delta) {
+      const cartItem = cart.find(function(item) { return item.id === productId; });
+      if (cartItem) {
+        cartItem.quantity += delta;
+        if (cartItem.quantity <= 0) {
+          cart = cart.filter(function(item) { return item.id !== productId; });
+        }
+      }
+      renderCart();
+    }
+
+    // הצגת תוכן העגלה וחישוב סכומים
+    function renderCart() {
+      const cartContainer = document.getElementById("cartItems");
+      const cartTotalContainer = document.getElementById("cartTotal");
+      const headerTotalContainer = document.getElementById("headerTotal");
+
+      if (!cartContainer || !cartTotalContainer || !headerTotalContainer) return;
+
+      let total = 0;
+
+      if (cart.length === 0) {
+        cartContainer.innerHTML = `<p style="color: #64748b; text-align: center; padding: 20px 0;">העגלה ריקה</p>`;
+        cartTotalContainer.innerHTML = `סה"כ: ₪0.00`;
+        headerTotalContainer.innerHTML = `סה"כ להזמנה: ₪0.00`;
+        return;
+      }
+
+      let html = "";
+      for (let i = 0; i < cart.length; i++) {
+        let item = cart[i];
+        const currentProduct = products.find(function(p) { return p.id === item.id; });
+        if (currentProduct) {
+          item.name = currentProduct.name;
+          item.price = currentProduct.price;
+        }
+
+        total += item.price * item.quantity;
+        html += `
+          <div class="cart-item">
+            <div class="cart-item-details">
+              <strong>${item.name}</strong><br>
+              <small>₪${item.price.toFixed(2)} × ${item.quantity}</small>
+            </div>
+            <div style="display: flex; gap: 5px; align-items: center;">
+              <button onclick="updateQuantity(${item.id}, 1)">+</button>
+              <button onclick="updateQuantity(${item.id}, -1)">-</button>
+              <button class="btn-danger" onclick="updateQuantity(${item.id}, -${item.quantity})">מחק</button>
+            </div>
+          </div>
+        `;
+      }
+
+      cartContainer.innerHTML = html;
+      cartTotalContainer.innerHTML = `סה"כ: ₪${total.toFixed(2)}`;
+      headerTotalContainer.innerHTML = `סה"כ להזמנה: ₪${total.toFixed(2)}`;
+    }
+
+    // שליחת הזמנה
+    function submitOrder() {
+      if (cart.length === 0) {
+        alert("העגלה ריקה, אנא הוסף פריטים לפני שליחת ההזמנה.");
+        return;
+      }
+      alert("ההזמנה נשלחה בהצלחה!");
+      cart = [];
+      renderCart();
+    }
+
+    // טעינה התחלתית
+    renderProducts();
+    renderCart();
+  </script>
+
+</body>
+</html>
