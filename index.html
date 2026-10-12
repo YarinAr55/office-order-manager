@@ -47,6 +47,15 @@
       font-size: 14px;
     }
 
+    .header-total-badge {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
     .container {
       max-width: 1300px;
       margin: 30px auto;
@@ -78,9 +87,28 @@
       padding-bottom: 8px;
     }
 
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 15px;
     }
 
@@ -102,7 +130,7 @@
 
     .product-title {
       font-weight: bold;
-      font-size: 16px;
+      font-size: 15px;
       margin-bottom: 5px;
     }
 
@@ -149,60 +177,5 @@
 
     .btn-danger {
       background: #dc2626;
-    }
-
-    .btn-danger:hover {
-      background: #b91c1c;
-    }
-
-    .checkout-btn {
-      width: 100%;
-      background: #059669;
-      margin-top: 15px;
-      padding: 12px;
-      font-size: 16px;
-    }
-
-    .checkout-btn:hover {
-      background: #047857;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="header-content">
-      <div>
-        <h1>מערכת הזמנות ציוד משרדי</h1>
-        <p>בחר את הפריטים הדרושים למשרדך ושלח הזמנה בקלות</p>
-      </div>
-    </div>
-  </header>
-
-  <div class="container">
-    <!-- קטלוג מוצרים -->
-    <main>
-      <div class="card">
-        <h2>קטלוג מוצרים</h2>
-        <div class="products-grid" id="productsGrid">
-          <!-- מוצרים יטענו דינמית דרך JavaScript -->
-        </div>
-      </div>
-    </main>
-
-    <!-- עגלת קניות / סיכום הזמנה -->
-    <aside>
-      <div class="card">
-        <h2>עגלת הזמנות</h2>
-        <div id="cartItems">
-          <p style="color: #64748b; text-align: center; padding: 20px 0;">העגלה ריקה</p>
-        </div>
-        <div class="cart-total" id="cartTotal">סה"כ: ₪0.00</div>
-        <button class="checkout-btn" onclick="submitOrder()">שליחת הזמנה</button>
-      </div>
-    </aside>
-  </div>
-
-  <script>
-    // רשימת מוצרים לדוגמה
-    const
+      padding: 5px 8px;
+      font-size:
